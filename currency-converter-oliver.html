@@ -1,0 +1,454 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymer/lib/utils/render-status.html">
+
+<dom-module id="currency-converter-oliver">
+  <link rel="import" type="css" href="demo/css/normalize.css">
+  <link rel="import" type="css" href="demo/css/fonts.css">
+  <link rel="import" type="css" href="demo/css/base.css">
+  <link rel="import" type="css" href="demo/css/form.css">
+  <link rel="import" type="css" href="demo/css/currency-flags.min.css"> <!-- https://github.com/transferwise/currency-flags -->
+  <template>
+
+    <style>
+
+      .styled-select {
+        display: inline-block;
+        position: relative;
+        margin: 1em;
+        max-width: 150px;
+        width: calc(100% - 2em);
+        vertical-align: top;
+        z-index: 200000;
+        max-height: 200px;
+        overflow-y: scroll;
+      }
+      .styled-select input {
+        width: 100%;
+        height: 1.5em;
+        border: none;
+        z-index: 1;
+        background-color: rgba(0, 0, 0, 1.0e-06);
+        position: absolute;
+        top: 0;
+        left: 0;
+        box-sizing: border-box;
+      }
+      .styled-select input:focus + span, .styled-select input + span:hover {
+        height: auto;
+      }
+      .styled-select .list {
+        display: block;
+        height: 1.5em;
+        overflow: hidden;
+        list-style: none;
+        margin: 0 0 0 0;
+        padding: 1.5em 0 0 0;
+        position: relative;
+        background-color: white;
+        width: 100%;
+        border: none;
+      }
+
+      ::-webkit-scrollbar {
+          -webkit-appearance: none;
+          width: 7px;
+      }
+      ::-webkit-scrollbar-thumb {
+          border-radius: 4px;
+          background-color: rgba(0,0,0,.5);
+          -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+      }
+
+      .styled-select .list:before {
+        content: attr(data-from);
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 35px;
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+        line-height: 25px;
+      }
+
+      .styled-select .list label {
+        padding: 5px;
+        display: block;
+        line-height: 25px;
+        height: 35px;
+        border-left: 1px solid #DDD;
+        border-right: 1px solid #DDD;
+      }
+      .styled-select .list label:last-child {
+        border-bottom: 1px solid #DDD;
+      }
+      .styled-select .list [type="radio"],
+      .styled-select .list [type="checkbox"] {
+        display: none;
+      }
+      .styled-select .list input:checked + label {
+        background-color: #DDD;
+      }
+      .styled-select .list input:checked + label:before {
+        content: attr(title);
+        position: absolute;
+        height: 35px;
+        width: 100%;
+        top: 0;
+        left: 0;
+        padding: 5px;
+        background-color: #FFF;
+        box-sizing: border-box;
+      }
+
+      p {
+        width: 25%;
+      }
+    </style>
+
+    <div class="container bg-corazona">
+
+      <section class="content bg-grey">
+
+
+        <h3 style="font-family: 'Montserrat', sans-serif;color:#232e7b">Live Currency Converter</h3>
+
+
+        <form class="" on-submit="onFormSubmit">
+
+          <span class="input input--minoru">
+
+  					<input
+            class="input__field input__field--minoru"
+            id="input-10"
+            min="0.01"
+            step="0.01"
+            type="number"
+            name="amount"
+            value$="{{amount}}"
+            on-input="onAmountChange" />
+
+  					<label class="input__label input__label--minoru" for="input-10">
+  						<span class="input__label-content input__label-content--minoru">Amount</span>
+  					</label>
+  				</span>
+
+          <!--  TEST -->
+
+
+          <!-- FROM -->
+          <span class="styled-select">
+
+            <input type="text" readonly />
+
+            <span id="fromList" class="list input__field input__field--minoru input__field__select--minoru" data-from="None">
+
+              <template is="dom-repeat" items="[[currencies]]" as="currency" itemsIndexAs="index">
+
+                <input checked$="[[firstElement(index)]]" type="radio" name="fromInput" id="from-[[currency]]" value="[[currency]]"/>
+                <label for="from-[[currency]]" title="[[currency]]" on-click="onChooseFrom">[[currency]] <span class$="[[currencyClass(currency)]]"></span></label>
+
+              </template>
+
+            </span>
+
+            <label class="input__label input__label--minoru" for="input-10">
+  						<span class="input__label-content input__label-content--minoru">From</span>
+  					</label>
+
+          </span>
+
+
+
+          <!-- TO -->
+          <span class="styled-select">
+
+            <input type="text" readonly />
+
+            <span id="toList" class="list input__field input__field--minoru input__field__select--minoru" data-to="None">
+
+              <template is="dom-repeat" items="[[currencies]]" as="currency" itemsIndexAs="index">
+
+                <input checked$="[[firstElement(index)]]" type="radio" name="toInput" id="to-[[currency]]" value="[[currency]]"/>
+                <label for="to-[[currency]]" title="[[currency]]" on-click="onChooseTo">[[currency]] <span class$="[[currencyClass(currency)]]"></span></label>
+
+              </template>
+
+            </span>
+
+            <label class="input__label input__label--minoru" for="input-10">
+  						<span class="input__label-content input__label-content--minoru">To</span>
+  					</label>
+
+          </span>
+
+          <!-- TEST -->
+
+
+          <!-- <span class="input input--minoru">
+
+            <select class="input__field input__field--minoru input__field__select--minoru" id="fromList" name="fromList" value$="{{from}}" on-change="onFromChange">
+              <template id="fromList" is="dom-repeat" items="[[currencies]]" as="currency">
+                <option value="[[currency]]">[[currency]]</option>
+              </template>
+            </select>
+
+            <label class="input__label input__label--minoru" for="input-10">
+  						<span class="input__label-content input__label-content--minoru">From</span>
+  					</label>
+
+          </span>
+
+          <span class="input input--minoru">
+
+            <select class="input__field input__field--minoru input__field__select--minoru" id="toList" name="toList" value$="{{to}}" on-change="onToChange">
+              <template id="toList" is="dom-repeat" items="[[currencies]]" as="currency">
+                <option value="[[currency]]">[[currency]]</option>
+              </template>
+            </select>
+
+            <label class="input__label input__label--minoru" for="input-10">
+  						<span class="input__label-content input__label-content--minoru">To</span>
+  					</label>
+
+          </span> -->
+
+          <span class="input input--minoru input__button--minoru">
+            <button class="input__field input__field--minoru" type="button" name="button" on-click="onSwap">SWAP</button>
+          </span>
+
+          <span class="input input--minoru input__button--minoru">
+            <button class="input__field input__field--minoru" type="submit" name="button">CONVERT</button>
+          </span>
+
+        </form>
+
+        <div class="resultContainer">
+          <template id="result" is="dom-if" if="[[showResult(amount, result)]]">
+            <h1>
+              <span class="from">[[amount]] <small>[[from]]</small>
+                <span class$="[[currencyClass(from, 'xl')]]"></span>
+              </span>
+              =
+              <span class="result">[[result]] <small>[[to]]</small>
+                <span class$="[[currencyClass(to, 'xl')]]"></span>
+              </span>
+            </h1>
+
+            <span class="eq">
+              <small>1 [[from]] <span class$="[[currencyClass(from)]]"></span>
+                <span> = </span>
+                [[rateTo(from, to)]] [[to]] <span class$="[[currencyClass(to)]]"></span>
+              </small>
+            </span>
+            <br>
+            <span class="eq">
+              <small>1 [[to]] <span class$="[[currencyClass(to)]]"></span>
+                <span> = </span>
+                [[rateFrom(from, to)]] [[from]] <span class$="[[currencyClass(from)]]"></span>
+              </small>
+            </span>
+          </template>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- <audio id="player" autoplay loop>
+      <source src="audio/yallineed.mp3" type="audio/mp3">
+    </audio> -->
+
+  </template>
+
+  <script>
+    /**
+     * `currency-converter-oliver`
+     *
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class CurrencyConverterOliver extends Polymer.Element {
+
+      static get is() {
+        return 'currency-converter-oliver';
+      }
+
+      static get properties() {
+        return {
+          from: String,
+          to: String,
+          amount: {
+            type: Number,
+            value: 1
+          },
+          rates: {
+            type: Object,
+            value: {}
+          },
+          currencies: {
+            type: Array,
+            value: [],
+            observer: 'currenciesObserver'
+          },
+          result: Number
+        };
+      }
+
+      onChooseFrom( { target } ){
+
+        let targetInput = this.shadowRoot.getElementById(`from-${target.title}`);
+
+        this.from = targetInput.value;
+        targetInput.checked = true;
+
+        this.result = this.convertCurrency();
+
+      }
+
+      onChooseTo( { target } ){
+
+        let targetInput = this.shadowRoot.getElementById(`to-${target.title}`);
+
+        this.to = targetInput.value;
+        targetInput.checked = true;
+
+        this.result = this.convertCurrency();
+
+      }
+
+
+      firstElement(index){
+
+        return index === 0;
+
+      }
+
+      currencyClass(currency, size = 'normal'){
+
+        if( size === 'normal' ){
+
+          return `currency-flag currency-flag-${currency.toLowerCase()}`
+
+        }else if ( size === 'sm' ) {
+
+          return `currency-flag currency-flag-sm currency-flag-${currency.toLowerCase()}`
+
+        } else if ( size === 'lg' ) {
+
+          return `currency-flag currency-flag-lg currency-flag-${currency.toLowerCase()}`
+
+        } else if ( size === 'xl' ) {
+
+          return `currency-flag currency-flag-xl currency-flag-${currency.toLowerCase()}`
+
+        }
+
+
+      }
+
+      currenciesObserver(oldVal, newVal){
+
+        Polymer.RenderStatus.afterNextRender(this, () => {
+
+          if(  Array.isArray(oldVal) && oldVal.length ){
+
+            if( !this.from && !this.to ){
+
+              this.from = oldVal[0];
+              this.to = oldVal[1];
+
+            } else {
+
+              const FROMSELECT = this.shadowRoot.getElementById(`from-${this.from}`);
+              const TOSELECT = this.shadowRoot.getElementById(`to-${this.to}`);
+
+              FROMSELECT.checked = true;
+              TOSELECT.checked = true;
+
+            }
+
+
+          }
+
+        });
+
+      }
+
+      showResult(amount, result){
+
+        return amount >= 0.01 && result !== undefined;
+
+      }
+
+      rateTo(amount, result){
+
+        return ( (1 / this.rates[this.from]) * this.rates[this.to] ).toFixed(3);
+
+      }
+
+      rateFrom(amount, result){
+
+        return ( (1 / this.rates[this.to]) * this.rates[this.from] ).toFixed(3);
+
+      }
+
+      convertCurrency(){
+
+        return ( (this.amount / this.rates[this.from]) * this.rates[this.to] ).toFixed(3);
+
+      }
+
+      onFromChange( { target: { value } } ){
+
+        this.from = value;
+        this.result = this.convertCurrency();
+
+      }
+
+      onToChange( { target: { value } } ){
+
+        this.to = value;
+        this.result = this.convertCurrency();
+
+      }
+
+      onFormSubmit(event){
+
+        event.preventDefault();
+        this.result = this.convertCurrency();
+
+      }
+
+      onSwap(){
+
+        let from = this.from;
+        let to = this.to;
+
+        this.from = to;
+        this.to = from;
+
+        const FROMSELECT = this.shadowRoot.getElementById(`from-${this.from}`);
+        const TOSELECT = this.shadowRoot.getElementById(`to-${this.to}`);
+
+        FROMSELECT.checked = true;
+        TOSELECT.checked = true;
+
+        this.result = this.convertCurrency();
+
+      }
+
+      onAmountChange( { target: { value } } ){
+
+        this.amount = value;
+        this.result = this.convertCurrency();
+
+      }
+
+    }
+
+    window.customElements.define(CurrencyConverterOliver.is, CurrencyConverterOliver);
+  </script>
+</dom-module>
